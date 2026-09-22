@@ -1,20 +1,4 @@
 /* ==========================================================================
-   Work Lista - estilos
-
-   Ideia visual: a lista é uma FOLHA de papel. As tarefas são linhas separadas
-   por fios finos (não cartões soltos), o campo "nova tarefa" é a primeira linha
-   da folha e concluir uma tarefa é riscá-la, com um traço na cor da marca.
-
-   Organização deste arquivo:
-     1. Tokens (cores, fontes, raios)      6. Folha, cabeçalho de página, filtros
-     2. Base                               7. Linhas de tarefa e estado vazio
-     3. Botões e campos                    8. Tela de login/cadastro
-     4. Barra superior                     9. Diálogo e avisos (toasts)
-     5. Ícones                            10. Responsivo e movimento reduzido
-   ========================================================================== */
-
-
-/* ==========================================================================
    1. Tokens
    ========================================================================== */
 :root {

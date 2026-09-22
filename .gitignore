@@ -1,8 +1,0 @@
-target/
-data/
-*.mv.db
-*.trace.db
-.idea/
-.vscode/
-*.iml
-.DS_Store
