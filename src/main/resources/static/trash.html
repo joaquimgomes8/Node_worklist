@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Lixeira | Work Lista</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400..700&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="wordmark" href="tasks.html" aria-label="Work Lista, ir para as tarefas">
+        <svg class="logo" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+          <rect class="logo-bg" width="32" height="32" rx="9"/>
+          <path class="logo-check" d="M9 16.5l4.5 4.5L23 11"/>
+        </svg>
+        <span class="wordmark-text">Work Lista</span>
+      </a>
+
+      <nav class="tabs" aria-label="Principal">
+        <a class="tab" href="tasks.html">Tarefas</a>
+        <a class="tab" href="trash.html" aria-current="page">Lixeira <span id="trash-count" class="count" hidden>0</span></a>
+      </nav>
+
+      <div class="user">
+        <span id="user-email" class="user-email"></span>
+        <button id="logout-btn" class="btn btn-quiet btn-sm" type="button" aria-label="Sair da conta">
+          <span data-icon="logout"></span><span class="btn-label">Sair</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="page-head">
+      <div>
+        <h1>Lixeira</h1>
+        <p class="page-sub">Restaure uma tarefa ou exclua de vez.</p>
+      </div>
+      <button id="empty-btn" class="btn btn-danger-quiet" type="button" hidden>
+        <span data-icon="trash"></span>Esvaziar lixeira
+      </button>
+    </div>
+
+    <div class="sheet">
+      <ul id="trash-list" class="rows"></ul>
+
+      <div id="status" class="empty" hidden>
+        <h2 id="status-title"></h2>
+        <p id="status-text"></p>
+        <a id="status-link" class="btn btn-quiet" href="tasks.html" hidden>Voltar para as tarefas</a>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/trash.js"></script>
+</body>
+</html>

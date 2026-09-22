@@ -1,0 +1,676 @@
+/* ==========================================================================
+   Work Lista - estilos
+
+   Ideia visual: a lista é uma FOLHA de papel. As tarefas são linhas separadas
+   por fios finos (não cartões soltos), o campo "nova tarefa" é a primeira linha
+   da folha e concluir uma tarefa é riscá-la, com um traço na cor da marca.
+
+   Organização deste arquivo:
+     1. Tokens (cores, fontes, raios)      6. Folha, cabeçalho de página, filtros
+     2. Base                               7. Linhas de tarefa e estado vazio
+     3. Botões e campos                    8. Tela de login/cadastro
+     4. Barra superior                     9. Diálogo e avisos (toasts)
+     5. Ícones                            10. Responsivo e movimento reduzido
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. Tokens
+   ========================================================================== */
+:root {
+  color-scheme: light dark;
+
+  /* Superfícies e texto */
+  --bg: #f4f6f3;
+  --surface: #ffffff;
+  --ink: #14201a;
+  --ink-soft: #56655d;
+  --ink-faint: #65746c;
+  --line: #e1e7e2;
+  --line-strong: #c9d3cc;
+
+  /* Marca: verde-pinho */
+  --accent: #0f6b57;
+  --accent-hover: #0a5443;
+  --accent-ink: #ffffff;   /* texto sobre a cor de destaque */
+  --accent-wash: #e2f0ea;  /* fundo suave de destaque */
+  --brand-bg: #0f6b57;     /* painel lateral do login */
+  --brand-ink: #f2faf6;
+
+  /* Perigo (lixeira / exclusão) */
+  --danger: #b63b2b;
+  --danger-solid: #b63b2b;
+  --danger-wash: #fbebe8;
+
+  /* Formas: cada tipo de elemento tem o seu raio */
+  --radius-sheet: 16px;
+  --radius-control: 10px;
+  --radius-check: 7px;
+
+  /* Tipografia: títulos com personalidade + texto de interface legível */
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-ui: "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1512;
+    --surface: #151d19;
+    --ink: #e8efe9;
+    --ink-soft: #a1afa7;
+    --ink-faint: #8c9a92;
+    --line: #243029;
+    --line-strong: #33423a;
+
+    --accent: #5cc9a7;
+    --accent-hover: #7bd8ba;
+    --accent-ink: #06241b;
+    --accent-wash: #173229;
+    --brand-bg: #11372d;
+    --brand-ink: #e6f5ee;
+
+    --danger: #f08c7e;
+    --danger-solid: #c4483a;
+    --danger-wash: #3b1f1b;
+  }
+}
+
+
+/* ==========================================================================
+   2. Base
+   ========================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, p { margin: 0; }
+
+h1, h2 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+h1 { font-size: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem); font-weight: 700; }
+h2 { font-size: 1.3rem; font-weight: 700; }
+
+a { color: var(--accent); }
+
+button, input, textarea { font: inherit; color: inherit; }
+
+/* Sempre respeita o atributo [hidden], mesmo em elementos com display definido. */
+[hidden] { display: none !important; }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Texto só para leitores de tela */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+
+/* ==========================================================================
+   3. Botões e campos
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0 1.1rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btn-primary { background: var(--accent); color: var(--accent-ink); }
+.btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+
+.btn-quiet { background: transparent; border-color: var(--line-strong); color: var(--ink); }
+.btn-quiet:hover:not(:disabled) { background: var(--accent-wash); border-color: var(--accent); }
+
+.btn-danger { background: var(--danger-solid); color: #ffffff; }
+.btn-danger:hover:not(:disabled) { filter: brightness(0.92); }
+
+.btn-danger-quiet { background: transparent; color: var(--danger); }
+.btn-danger-quiet:hover:not(:disabled) { background: var(--danger-wash); }
+
+.btn-sm { min-height: 36px; padding: 0 0.8rem; font-size: 0.92rem; }
+.btn-block { width: 100%; }
+
+.field { display: grid; gap: 0.4rem; margin-bottom: 1.1rem; }
+.field label { font-weight: 600; font-size: 0.94rem; }
+
+.input {
+  width: 100%;
+  min-height: 46px;
+  padding: 0.6rem 0.85rem;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+}
+.input::placeholder,
+.composer-title::placeholder,
+.composer-desc::placeholder { color: var(--ink-faint); }
+.input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+
+.hint { color: var(--ink-faint); font-size: 0.88rem; }
+
+.form-error,
+.form-notice {
+  margin-bottom: 1.1rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: var(--radius-control);
+  font-size: 0.95rem;
+}
+.form-error  { background: var(--danger-wash); color: var(--danger); }
+.form-notice { background: var(--accent-wash); color: var(--ink); }
+
+.password-wrap { position: relative; }
+.password-wrap .input { padding-right: 5.25rem; }
+.toggle-pass {
+  position: absolute;
+  top: 50%; right: 0.3rem;
+  transform: translateY(-50%);
+  padding: 0.55rem 0.7rem;
+  background: none; border: 0; border-radius: 8px;
+  color: var(--accent);
+  font-weight: 600; font-size: 0.9rem;
+  cursor: pointer;
+}
+.toggle-pass:hover { background: var(--accent-wash); }
+
+
+/* ==========================================================================
+   4. Barra superior
+   O item ativo é sublinhado sobre a própria borda da barra.
+   ========================================================================== */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+
+.topbar-inner {
+  display: flex;
+  align-items: stretch;
+  max-width: 760px;
+  min-height: 60px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  gap: 0.6rem;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+.logo { flex: none; }
+.logo-bg    { fill: var(--accent); }
+.logo-check { fill: none; stroke: var(--accent-ink); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+
+.tabs { display: flex; align-self: stretch; gap: 0.25rem; margin-left: 1.25rem; }
+
+.tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 0.8rem;
+  color: var(--ink-soft);
+  font-weight: 600;
+  text-decoration: none;
+}
+.tab:hover { color: var(--ink); }
+.tab[aria-current="page"] { color: var(--ink); }
+.tab[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  left: 0.6rem; right: 0.6rem; bottom: -1px;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--accent);
+}
+
+.count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.4rem; height: 1.4rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--accent-wash);
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.user { display: flex; align-items: center; gap: 0.75rem; margin-left: auto; }
+.user-email {
+  max-width: 200px;
+  overflow: hidden;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* ==========================================================================
+   5. Ícones
+   ========================================================================== */
+.icon { flex: none; width: 20px; height: 20px; }
+.btn .icon { width: 18px; height: 18px; }
+
+
+/* ==========================================================================
+   6. Folha, cabeçalho da página e filtros
+   ========================================================================== */
+.page { max-width: 760px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+
+.page-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.page-sub { margin-top: 0.35rem; color: var(--ink-soft); min-height: 1.5em; }
+
+.sheet {
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sheet);
+  box-shadow: 0 14px 34px -22px rgba(16, 32, 25, 0.28);
+}
+
+/* Nova tarefa */
+.composer {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1.1rem 1.25rem 1rem;
+  border-bottom: 1px solid var(--line);
+  transition: box-shadow 0.15s;
+}
+/* Uma barra na cor da marca indica que a linha está em edição. */
+.composer:focus-within { box-shadow: inset 3px 0 0 var(--accent); }
+
+.composer-title,
+.composer-desc {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  outline: none;
+}
+.composer-title { padding: 0.35rem 0; font-size: 1.15rem; font-weight: 600; }
+.composer-desc  { min-height: 3.2rem; padding: 0.25rem 0; resize: vertical; color: var(--ink-soft); }
+.composer-actions { display: flex; justify-content: flex-end; padding-top: 0.25rem; }
+
+/* Filtros */
+.toolbar { display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0.7rem 1.25rem; border-bottom: 1px solid var(--line); }
+.chip {
+  min-height: 36px;
+  padding: 0 0.95rem;
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+.chip:hover { color: var(--ink); border-color: var(--accent); }
+.chip[aria-pressed="true"] { background: var(--accent-wash); border-color: var(--accent); color: var(--accent); }
+
+
+/* ==========================================================================
+   7. Linhas de tarefa e estado vazio
+   ========================================================================== */
+.rows { margin: 0; padding: 0; list-style: none; }
+
+.row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.9rem;
+  align-items: start;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--line);
+}
+.row:last-child { border-bottom: 0; }
+
+/* Caixa de seleção própria (o marcador de "feito" é desenhado com CSS) */
+.check {
+  -webkit-appearance: none;
+  appearance: none;
+  position: relative;
+  flex: none;
+  width: 26px; height: 26px;
+  margin: 0.1rem 0 0;
+  background: var(--surface);
+  border: 2px solid var(--line-strong);
+  border-radius: var(--radius-check);
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+.check::before { content: ""; position: absolute; inset: -9px; } /* aumenta a área de toque para 44px */
+.check::after {
+  content: "";
+  position: absolute;
+  left: 7px; top: 2px;
+  width: 6px; height: 12px;
+  border: solid var(--accent-ink);
+  border-width: 0 2.5px 2.5px 0;
+  transform: rotate(45deg) scale(0);
+  transition: transform 0.15s ease-out;
+}
+.check:hover { border-color: var(--accent); }
+.check:checked { background: var(--accent); border-color: var(--accent); }
+.check:checked::after { transform: rotate(45deg) scale(1); }
+
+.row-body { min-width: 0; }
+
+.row-title {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  transition: color 0.15s;
+}
+label.row-title { cursor: pointer; }
+
+.row-desc {
+  margin-top: 0.15rem;
+  color: var(--ink-soft);
+  font-size: 0.97rem;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.row-meta { display: block; margin-top: 0.4rem; color: var(--ink-faint); font-size: 0.83rem; }
+
+/* Tarefa concluída: riscada com o traço na cor da marca */
+.is-done .row-title {
+  color: var(--ink-soft);
+  text-decoration: line-through;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+}
+.is-done .row-desc { opacity: 0.7; }
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 44px; height: 44px;
+  margin: -0.4rem -0.5rem -0.4rem 0;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-control);
+  color: var(--ink-faint);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+.icon-btn:hover,
+.icon-btn:focus-visible { background: var(--danger-wash); color: var(--danger); }
+
+/* Lixeira: sem caixa de seleção; título e ações */
+.row-trash { grid-template-columns: 1fr auto; align-items: center; }
+.row-trash .row-title { color: var(--ink-soft); }
+.row-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.4rem; }
+
+/* Estado vazio / carregando */
+.empty {
+  display: grid;
+  justify-items: center;
+  gap: 0.4rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+.empty h2 { font-size: 1.25rem; }
+.empty p { max-width: 34ch; color: var(--ink-soft); }
+.empty .btn { margin-top: 0.75rem; }
+
+
+/* ==========================================================================
+   8. Login / cadastro
+   O único momento "de destaque": a lista do painel de marca se risca sozinha.
+   ========================================================================== */
+.auth {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.auth-brand {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: clamp(1.75rem, 5vw, 4rem);
+  background: var(--brand-bg);
+  color: var(--brand-ink);
+}
+.wordmark-light { color: var(--brand-ink); }
+.auth-brand .logo-bg    { fill: var(--brand-ink); }
+.auth-brand .logo-check { stroke: var(--brand-bg); }
+
+.brand-body { display: grid; gap: 2.25rem; }
+.brand-headline {
+  max-width: 13ch;
+  font-family: var(--font-display);
+  font-size: clamp(2.3rem, 1.4rem + 3.4vw, 4rem);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}
+
+.demo {
+  display: grid;
+  gap: 0.25rem;
+  max-width: 26rem;
+  margin: 0;
+  padding: 0.5rem 1.1rem;
+  list-style: none;
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-sheet);
+}
+.demo li { display: flex; align-items: center; gap: 0.85rem; padding: 0.7rem 0; }
+.demo li + li { border-top: 1px solid rgba(255, 255, 255, 0.14); }
+
+.demo-box {
+  position: relative;
+  flex: none;
+  width: 22px; height: 22px;
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  border-radius: 6px;
+}
+.demo-text { position: relative; display: inline-block; font-weight: 500; }
+
+/* As duas primeiras linhas são riscadas em sequência; a terceira fica pendente. */
+.demo li:nth-child(1) { --delay: 0.9s; }
+.demo li:nth-child(2) { --delay: 1.7s; }
+.demo li:nth-child(1) .demo-box,
+.demo li:nth-child(2) .demo-box { animation: demo-fill 0.25s ease-out var(--delay) forwards; }
+.demo li:nth-child(1) .demo-box::after,
+.demo li:nth-child(2) .demo-box::after {
+  content: "";
+  position: absolute;
+  left: 5px; top: 1px;
+  width: 5px; height: 10px;
+  border: solid var(--brand-bg);
+  border-width: 0 2.5px 2.5px 0;
+  transform: rotate(45deg);
+  opacity: 0;
+  animation: demo-appear 0.01s linear var(--delay) forwards;
+}
+.demo li:nth-child(1) .demo-text::after,
+.demo li:nth-child(2) .demo-text::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: 55%;
+  height: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: demo-strike 0.45s ease-out var(--delay) forwards;
+}
+.demo li:nth-child(1) .demo-text,
+.demo li:nth-child(2) .demo-text { animation: demo-fade 0.45s ease-out var(--delay) forwards; }
+
+@keyframes demo-fill   { to { background: var(--brand-ink); border-color: var(--brand-ink); } }
+@keyframes demo-appear { to { opacity: 1; } }
+@keyframes demo-strike { to { transform: scaleX(1); } }
+@keyframes demo-fade   { to { opacity: 0.6; } }
+
+.auth-panel { display: grid; place-items: center; padding: clamp(1.5rem, 4vw, 3rem); }
+.auth-card { width: min(100%, 400px); }
+
+.auth-switch { display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 1.75rem; border-bottom: 1px solid var(--line); }
+.auth-tab {
+  position: relative;
+  padding: 0.85rem 0;
+  background: none; border: 0;
+  color: var(--ink-soft);
+  font-weight: 600;
+  cursor: pointer;
+}
+.auth-tab:hover { color: var(--ink); }
+.auth-tab[aria-pressed="true"] { color: var(--ink); }
+.auth-tab[aria-pressed="true"]::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--accent);
+}
+
+.auth-card h1 { margin-bottom: 0.4rem; }
+.auth-sub { margin-bottom: 1.5rem; color: var(--ink-soft); }
+
+
+/* ==========================================================================
+   9. Diálogo de confirmação e avisos (toasts)
+   ========================================================================== */
+.dialog {
+  width: min(92vw, 420px);
+  padding: 1.5rem;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sheet);
+  box-shadow: 0 28px 60px -24px rgba(0, 0, 0, 0.45);
+}
+.dialog::backdrop { background: rgba(10, 20, 16, 0.5); }
+.dialog[open] { animation: dialog-in 0.18s ease-out; }
+.dialog h2 { margin-bottom: 0.5rem; }
+.dialog p { color: var(--ink-soft); overflow-wrap: anywhere; }
+.dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.6rem; margin-top: 1.5rem; }
+
+@keyframes dialog-in { from { opacity: 0; transform: translateY(6px) scale(0.98); } }
+
+.toasts {
+  position: fixed;
+  left: 50%; bottom: 1.25rem;
+  z-index: 50;
+  display: grid;
+  gap: 0.5rem;
+  width: min(92vw, 420px);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.toast {
+  padding: 0.75rem 1rem;
+  background: var(--ink);
+  color: var(--surface);
+  border-radius: 12px;
+  font-weight: 500;
+  box-shadow: 0 12px 30px -12px rgba(0, 0, 0, 0.5);
+  animation: toast-in 0.2s ease-out, toast-out 0.3s ease-in 3.2s forwards;
+}
+.toast-error { background: var(--danger-solid); color: #ffffff; }
+
+@keyframes toast-in  { from { opacity: 0; transform: translateY(8px); } }
+@keyframes toast-out { to   { opacity: 0; transform: translateY(8px); } }
+
+
+/* ==========================================================================
+   10. Responsivo e movimento reduzido
+   ========================================================================== */
+@media (max-width: 860px) {
+  /* Login: o painel de marca vira uma faixa no topo */
+  .auth { grid-template-columns: 1fr; min-height: 0; }
+  .auth-brand { gap: 1rem; padding: 1.5rem 1.25rem 1.75rem; }
+  .brand-body { gap: 0; }
+  .brand-headline { max-width: none; font-size: 1.9rem; }
+  .demo { display: none; }
+  .auth-panel { padding: 2rem 1.25rem 3rem; align-items: start; }
+}
+
+@media (max-width: 640px) {
+  .user-email, .btn-label { display: none; }
+  .user .btn { padding: 0 0.6rem; }
+  .tabs { margin-left: 0.5rem; }
+
+  .page { padding-top: 1.5rem; }
+  .composer, .row, .toolbar { padding-left: 1rem; padding-right: 1rem; }
+  .composer-actions .btn { width: 100%; }
+
+  /* Lixeira: as ações passam para baixo do título */
+  .row-trash { grid-template-columns: 1fr; gap: 0.6rem; }
+  .row-actions { justify-content: flex-start; }
+}
+
+@media (max-width: 480px) {
+  .topbar .wordmark-text { display: none; } /* só o logotipo, para caber tudo na barra */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+
+  /* A demonstração aparece já "riscada", sem animar. */
+  .demo li .demo-box,
+  .demo li .demo-box::after,
+  .demo li .demo-text,
+  .demo li .demo-text::after { animation-duration: 0.01ms !important; animation-delay: 0s !important; }
+  .dialog[open] { animation: none; }
+
+  /* Os avisos somem por temporizador em JS, então não dependem de animação. */
+  .toast { animation: none !important; }
+}

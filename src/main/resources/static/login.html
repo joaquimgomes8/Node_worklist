@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Entrar | Work Lista</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400..700&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <main class="auth">
+
+    <!-- Painel de marca (decorativo): a lista "se risca" sozinha uma única vez ao abrir a página. -->
+    <section class="auth-brand" aria-hidden="true">
+      <div class="wordmark wordmark-light">
+        <svg class="logo" viewBox="0 0 32 32" width="30" height="30">
+          <rect class="logo-bg" width="32" height="32" rx="9"/>
+          <path class="logo-check" d="M9 16.5l4.5 4.5L23 11"/>
+        </svg>
+        <span class="wordmark-text">Work Lista</span>
+      </div>
+
+      <div class="brand-body">
+        <p class="brand-headline">Anote, risque, siga em frente.</p>
+        <ul class="demo">
+          <li><span class="demo-box"></span><span class="demo-text">Enviar proposta ao cliente</span></li>
+          <li><span class="demo-box"></span><span class="demo-text">Revisar o contrato com o jurídico</span></li>
+          <li><span class="demo-box"></span><span class="demo-text">Marcar a reunião de segunda</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Formulário -->
+    <section class="auth-panel">
+      <div class="auth-card">
+
+        <div class="auth-switch" role="group" aria-label="Escolha uma opção">
+          <button type="button" class="auth-tab" data-mode="login" aria-pressed="true">Entrar</button>
+          <button type="button" class="auth-tab" data-mode="register" aria-pressed="false">Criar conta</button>
+        </div>
+
+        <h1 id="auth-title">Entrar</h1>
+        <p id="auth-sub" class="auth-sub">Acesse a sua lista de tarefas.</p>
+
+        <p id="auth-notice" class="form-notice" role="status" hidden>Sua sessão expirou. Entre novamente.</p>
+
+        <form id="auth-form" novalidate>
+          <div class="field">
+            <label for="email">E-mail</label>
+            <input class="input" id="email" name="email" type="email" inputmode="email"
+                   autocomplete="email" placeholder="voce@empresa.com" required>
+          </div>
+
+          <div class="field">
+            <label for="password">Senha</label>
+            <div class="password-wrap">
+              <input class="input" id="password" name="password" type="password"
+                     autocomplete="current-password" required>
+              <button type="button" id="toggle-pass" class="toggle-pass" aria-controls="password">Mostrar</button>
+            </div>
+            <p id="password-hint" class="hint" hidden>Use pelo menos 8 caracteres.</p>
+          </div>
+
+          <div class="field" id="confirm-field" hidden>
+            <label for="confirm">Confirmar senha</label>
+            <input class="input" id="confirm" name="confirm" type="password" autocomplete="new-password">
+          </div>
+
+          <p id="auth-error" class="form-error" role="alert" hidden></p>
+
+          <button id="auth-submit" class="btn btn-primary btn-block" type="submit">Entrar</button>
+        </form>
+
+      </div>
+    </section>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>
