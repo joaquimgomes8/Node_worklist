@@ -99,6 +99,57 @@
 		row.querySelector('.row-title').textContent = task.title;
 		row.querySelector('.row-desc')?.append(task.description || '');
 		row.querySelector('.row-meta').textContent = trash ? 'Enviada para a lixeira' : (task.done ? 'Concluída' : 'Pendente');
+		const extra = document.createElement('div');
+		extra.className = 'task-extra';
+		if (task.priority) {
+			const priority = document.createElement('span');
+			priority.className = `priority-${task.priority}`;
+			priority.textContent = `Prioridade: ${task.priority === 'media' ? 'média' : task.priority}`;
+			extra.append(priority);
+		}
+		if (task.dueDate) {
+			const dueDate = document.createElement('span');
+			dueDate.textContent = `Prazo: ${new Date(`${task.dueDate}T00:00:00`).toLocaleDateString('pt-BR')}`;
+			extra.append(dueDate);
+		}
+		if (task.link) {
+			const link = document.createElement('a');
+			link.href = task.link;
+			link.target = '_blank';
+			link.rel = 'noopener noreferrer';
+			link.textContent = 'Abrir link';
+			extra.append(link);
+		}
+		row.querySelector('.row-body').append(extra);
+		if (task.image) {
+			const image = document.createElement('img');
+			image.className = 'row-attachment';
+			image.src = task.image;
+			image.alt = `Imagem anexada à tarefa ${task.title}`;
+			row.querySelector('.row-body').append(image);
+		}
+		if (task.subtasks?.length && !trash) {
+			const subtasks = document.createElement('ul');
+			subtasks.className = 'row-subtasks';
+			task.subtasks.forEach((subtask, index) => {
+				const item = document.createElement('li');
+				const label = document.createElement('label');
+				const checkbox = document.createElement('input');
+				checkbox.type = 'checkbox';
+				checkbox.checked = subtask.done;
+				checkbox.addEventListener('change', () => {
+					const tasks = getTasks();
+					const current = tasks.find((entry) => entry.id === task.id);
+					if (current?.subtasks?.[index]) current.subtasks[index].done = checkbox.checked;
+					saveTasks(tasks);
+					renderTasks();
+				});
+				label.append(checkbox, document.createTextNode(subtask.title));
+				item.append(label);
+				subtasks.append(item);
+			});
+			row.querySelector('.row-body').append(subtasks);
+		}
 		row.querySelector('[data-action="trash"]')?.addEventListener('click', () => moveToTrash(task.id));
 		row.querySelector('[data-action="restore"]')?.addEventListener('click', () => restoreTask(task.id));
 		row.querySelector('[data-action="delete"]')?.addEventListener('click', () => deleteTask(task.id));
@@ -175,23 +226,81 @@
 		const form = document.querySelector('#task-form');
 		if (!form) return;
 		const modal = document.querySelector('#task-modal');
+		let draftSubtasks = [];
+		let draftImage = '';
+		const renderDraftSubtasks = () => {
+			const list = document.querySelector('#subtask-editor-list');
+			list.replaceChildren(...draftSubtasks.map((subtask, index) => {
+				const item = document.createElement('li');
+				item.className = 'subtask-editor-item';
+				const checkbox = document.createElement('input');
+				checkbox.type = 'checkbox';
+				checkbox.checked = subtask.done;
+				checkbox.setAttribute('aria-label', `Concluir subtarefa ${subtask.title}`);
+				checkbox.addEventListener('change', () => { subtask.done = checkbox.checked; });
+				item.append(checkbox, document.createTextNode(subtask.title));
+				const remove = document.createElement('button');
+				remove.type = 'button';
+				remove.textContent = 'Remover';
+				remove.addEventListener('click', () => { draftSubtasks.splice(index, 1); renderDraftSubtasks(); });
+				item.append(remove);
+				return item;
+			}));
+		};
+		const showImage = (data) => {
+			draftImage = data;
+			const preview = document.querySelector('#image-preview');
+			preview.hidden = !data;
+			preview.querySelector('img').src = data || '';
+		};
+		const readImage = (file) => {
+			if (!file || !file.type.startsWith('image/')) return;
+			const reader = new FileReader();
+			reader.addEventListener('load', () => showImage(reader.result));
+			reader.readAsDataURL(file);
+		};
+		const resetDraft = () => {
+			draftSubtasks = [];
+			showImage('');
+			document.querySelector('#subtask-input').value = '';
+			document.querySelector('#task-image').value = '';
+			renderDraftSubtasks();
+		};
 		const openModal = () => {
 			modal.hidden = false;
 			document.querySelector('#task-category-label').textContent = `Categoria: ${selectedCategory}`;
 			form.elements.title.focus();
 		};
-		const closeModal = () => { modal.hidden = true; form.reset(); };
+		const closeModal = () => { modal.hidden = true; form.reset(); resetDraft(); };
 		document.querySelector('#open-task-modal').addEventListener('click', openModal);
 		document.querySelector('#close-task-modal').addEventListener('click', closeModal);
 		document.querySelector('#cancel-task-modal').addEventListener('click', closeModal);
 		modal.addEventListener('click', (event) => { if (event.target === modal) closeModal(); });
 		document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !modal.hidden) closeModal(); });
+		document.querySelector('#add-subtask').addEventListener('click', () => {
+			const input = document.querySelector('#subtask-input');
+			const title = input.value.trim();
+			if (!title) return input.focus();
+			draftSubtasks.push({ title, done: false });
+			input.value = '';
+			renderDraftSubtasks();
+			input.focus();
+		});
+		document.querySelector('#subtask-input').addEventListener('keydown', (event) => {
+			if (event.key === 'Enter') { event.preventDefault(); document.querySelector('#add-subtask').click(); }
+		});
+		document.querySelector('#task-image').addEventListener('change', (event) => readImage(event.target.files[0]));
+		document.querySelector('#remove-image').addEventListener('click', () => showImage(''));
+		modal.addEventListener('paste', (event) => {
+			const image = [...(event.clipboardData?.items || [])].find((item) => item.type.startsWith('image/'));
+			if (image) { event.preventDefault(); readImage(image.getAsFile()); }
+		});
 		form.addEventListener('submit', (event) => {
 			event.preventDefault();
 			const title = form.elements.title.value.trim();
 			if (!title) return form.elements.title.focus();
 			const tasks = getTasks();
-			tasks.unshift({ id: crypto.randomUUID(), category: selectedCategory, title, description: form.elements.description.value.trim(), done: false, deleted: false });
+			tasks.unshift({ id: crypto.randomUUID(), category: selectedCategory, title, description: form.elements.description.value.trim(), dueDate: form.elements.dueDate.value, priority: form.elements.priority.value, link: form.elements.link.value.trim(), subtasks: draftSubtasks, image: draftImage, done: false, deleted: false });
 			saveTasks(tasks);
 			closeModal();
 			renderTasks();

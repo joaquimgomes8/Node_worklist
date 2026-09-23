@@ -475,6 +475,24 @@ label.row-title { cursor: pointer; }
 .modal-card .composer label { font-weight: 600; font-size: 0.94rem; }
 .modal-card .composer-actions { gap: 0.5rem; }
 .modal-category { color: var(--ink-soft); font-size: 0.9rem; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.form-grid > div, .subtasks-editor, .attachment-field { display: grid; gap: 0.4rem; }
+.subtask-add { display: flex; gap: 0.5rem; }
+.subtask-add .input { min-width: 0; }
+.subtask-editor-list { display: grid; gap: 0.35rem; margin: 0; padding: 0; list-style: none; }
+.subtask-editor-item { display: flex; align-items: center; gap: 0.5rem; color: var(--ink-soft); }
+.subtask-editor-item button { margin-left: auto; border: 0; background: transparent; color: var(--danger); cursor: pointer; }
+.field-help { margin: 0; color: var(--ink-faint); font-size: 0.82rem; }
+.image-preview { display: flex; align-items: center; gap: 0.75rem; }
+.image-preview img { width: 72px; height: 56px; border: 1px solid var(--line); border-radius: var(--radius-control); object-fit: cover; }
+.task-extra { display: flex; flex-wrap: wrap; gap: 0.45rem 0.75rem; margin-top: 0.45rem; color: var(--ink-faint); font-size: 0.83rem; }
+.task-extra a { color: var(--accent); }
+.priority-alta { color: var(--danger); font-weight: 700; }
+.priority-media { color: #9a6a00; font-weight: 700; }
+.priority-baixa { color: var(--accent); }
+.row-subtasks { display: grid; gap: 0.25rem; margin: 0.55rem 0 0; padding: 0; list-style: none; color: var(--ink-soft); font-size: 0.88rem; }
+.row-subtasks label { display: flex; align-items: center; gap: 0.4rem; }
+.row-attachment { display: block; width: 84px; height: 64px; margin-top: 0.6rem; border-radius: var(--radius-control); object-fit: cover; }
 
 
 /* ==========================================================================
