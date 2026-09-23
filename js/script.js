@@ -190,7 +190,10 @@
 		if (!list) return;
 		const filter = document.querySelector('[data-filter][aria-pressed="true"]')?.dataset.filter || 'all';
 		const tasks = getTasks();
-		const active = tasks.filter((task) => !task.deleted && (selectedCategory === 'Geral' || (task.category || 'Pessoal') === selectedCategory) && (filter === 'all' || (filter === 'done' ? task.done : !task.done)));
+		const priorityOrder = { alta: 1, media: 2, baixa: 3 };
+		const active = tasks
+			.filter((task) => !task.deleted && (selectedCategory === 'Geral' || (task.category || 'Pessoal') === selectedCategory) && (filter === 'all' || (filter === 'done' ? task.done : !task.done)))
+			.sort((first, second) => (priorityOrder[first.priority] || 3) - (priorityOrder[second.priority] || 3));
 		list.replaceChildren(...active.map((task) => renderTaskRow(task)));
 		const status = document.querySelector('#status');
 		if (active.length === 0) {
