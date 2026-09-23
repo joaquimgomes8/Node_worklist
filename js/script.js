@@ -4,6 +4,7 @@
 	const SESSION_KEY = 'work-lista-session';
 	const USERS_KEY = 'work-lista-users';
 	const TASKS_PREFIX = 'work-lista-tasks:';
+	let selectedCategory = 'Pessoal';
 
 	const readJson = (key, fallback) => {
 		try {
@@ -127,7 +128,7 @@
 		if (!list) return;
 		const filter = document.querySelector('[data-filter][aria-pressed="true"]')?.dataset.filter || 'all';
 		const tasks = getTasks();
-		const active = tasks.filter((task) => !task.deleted && (filter === 'all' || (filter === 'done' ? task.done : !task.done)));
+		const active = tasks.filter((task) => !task.deleted && (task.category || 'Pessoal') === selectedCategory && (filter === 'all' || (filter === 'done' ? task.done : !task.done)));
 		list.replaceChildren(...active.map((task) => renderTaskRow(task)));
 		const status = document.querySelector('#status');
 		if (active.length === 0) {
@@ -135,9 +136,10 @@
 		} else if (status) {
 			status.hidden = true;
 		}
-		const done = tasks.filter((task) => !task.deleted && task.done).length;
-		const pending = tasks.filter((task) => !task.deleted && !task.done).length;
-		document.querySelector('#summary').textContent = `${pending} pendente${pending === 1 ? '' : 's'} · ${done} concluída${done === 1 ? '' : 's'}`;
+		const categoryTasks = tasks.filter((task) => !task.deleted && (task.category || 'Pessoal') === selectedCategory);
+		const done = categoryTasks.filter((task) => task.done).length;
+		const pending = categoryTasks.filter((task) => !task.done).length;
+		document.querySelector('#summary').textContent = `${selectedCategory} · ${pending} pendente${pending === 1 ? '' : 's'} · ${done} concluída${done === 1 ? '' : 's'}`;
 		updateTrashCount();
 	}
 
@@ -177,7 +179,7 @@
 			const title = form.elements.title.value.trim();
 			if (!title) return form.elements.title.focus();
 			const tasks = getTasks();
-			tasks.unshift({ id: crypto.randomUUID(), title, description: form.elements.description.value.trim(), done: false, deleted: false });
+			tasks.unshift({ id: crypto.randomUUID(), category: selectedCategory, title, description: form.elements.description.value.trim(), done: false, deleted: false });
 			saveTasks(tasks);
 			form.reset();
 			renderTasks();
@@ -185,6 +187,12 @@
 		});
 		document.querySelectorAll('[data-filter]').forEach((button) => button.addEventListener('click', () => {
 			document.querySelectorAll('[data-filter]').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+			renderTasks();
+		}));
+		document.querySelectorAll('[data-category]').forEach((button) => button.addEventListener('click', () => {
+			selectedCategory = button.dataset.category;
+			document.querySelectorAll('[data-category]').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+			document.querySelector('#task-submit').lastChild.textContent = `Adicionar tarefa em ${selectedCategory}`;
 			renderTasks();
 		}));
 		renderTasks();
