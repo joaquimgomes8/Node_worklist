@@ -1,0 +1,22 @@
+{
+  "name": "node_worklist",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joaquimgomes8/Springboot_worklist.git"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/joaquimgomes8/Springboot_worklist/issues"
+  },
+  "homepage": "https://github.com/joaquimgomes8/Springboot_worklist#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}

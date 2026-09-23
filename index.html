@@ -3,11 +3,80 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Work Lista</title>
+  <meta name="color-scheme" content="light dark">
+  <title>Tarefas | Work Lista</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <!-- Sem JavaScript, cai direto no login. -->
-  <noscript><meta http-equiv="refresh" content="0; url=login.html"></noscript>
-<script src="js/script.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400..700&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
-<body></body>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="wordmark" href="tasks.html" aria-label="Work Lista, ir para as tarefas">
+        <svg class="logo" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+          <rect class="logo-bg" width="32" height="32" rx="9"/>
+          <path class="logo-check" d="M9 16.5l4.5 4.5L23 11"/>
+        </svg>
+        <span class="wordmark-text">Work Lista</span>
+      </a>
+
+      <nav class="tabs" aria-label="Principal">
+        <a class="tab" href="tasks.html" aria-current="page">Tarefas</a>
+        <a class="tab" href="trash.html">Lixeira <span id="trash-count" class="count" hidden>0</span></a>
+      </nav>
+
+      <div class="user">
+        <span id="user-email" class="user-email"></span>
+        <button id="logout-btn" class="btn btn-quiet btn-sm" type="button" aria-label="Sair da conta">
+          <span data-icon="logout"></span><span class="btn-label">Sair</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="page-head">
+      <div>
+        <h1>Tarefas</h1>
+        <p id="summary" class="page-sub" aria-live="polite"></p>
+      </div>
+    </div>
+
+    <div class="sheet">
+      <!-- Nova tarefa: é a primeira "linha" da folha -->
+      <form id="task-form" class="composer">
+        <label class="sr-only" for="task-title">Título da tarefa</label>
+        <input id="task-title" class="composer-title" name="title" type="text" maxlength="120"
+               placeholder="O que precisa ser feito?" autocomplete="off" required>
+
+        <label class="sr-only" for="task-desc">Descrição da tarefa</label>
+        <textarea id="task-desc" class="composer-desc" name="description" rows="2" maxlength="1000"
+                  placeholder="Detalhes (opcional)"></textarea>
+
+        <div class="composer-actions">
+          <button id="task-submit" class="btn btn-primary" type="submit">
+            <span data-icon="plus"></span>Adicionar tarefa
+          </button>
+        </div>
+      </form>
+
+      <div class="toolbar" role="group" aria-label="Filtrar tarefas">
+        <button class="chip" type="button" data-filter="all" aria-pressed="true">Todas</button>
+        <button class="chip" type="button" data-filter="pending" aria-pressed="false">Pendentes</button>
+        <button class="chip" type="button" data-filter="done" aria-pressed="false">Concluídas</button>
+      </div>
+
+      <ul id="task-list" class="rows"></ul>
+
+      <div id="status" class="empty" hidden>
+        <h2 id="status-title"></h2>
+        <p id="status-text"></p>
+      </div>
+    </div>
+  </main>
+
+<script src="js/script.js"></script>
+</body>
 </html>
