@@ -174,6 +174,18 @@
 	function initTasks() {
 		const form = document.querySelector('#task-form');
 		if (!form) return;
+		const modal = document.querySelector('#task-modal');
+		const openModal = () => {
+			modal.hidden = false;
+			document.querySelector('#task-category-label').textContent = `Categoria: ${selectedCategory}`;
+			form.elements.title.focus();
+		};
+		const closeModal = () => { modal.hidden = true; form.reset(); };
+		document.querySelector('#open-task-modal').addEventListener('click', openModal);
+		document.querySelector('#close-task-modal').addEventListener('click', closeModal);
+		document.querySelector('#cancel-task-modal').addEventListener('click', closeModal);
+		modal.addEventListener('click', (event) => { if (event.target === modal) closeModal(); });
+		document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !modal.hidden) closeModal(); });
 		form.addEventListener('submit', (event) => {
 			event.preventDefault();
 			const title = form.elements.title.value.trim();
@@ -181,9 +193,8 @@
 			const tasks = getTasks();
 			tasks.unshift({ id: crypto.randomUUID(), category: selectedCategory, title, description: form.elements.description.value.trim(), done: false, deleted: false });
 			saveTasks(tasks);
-			form.reset();
+			closeModal();
 			renderTasks();
-			form.elements.title.focus();
 		});
 		document.querySelectorAll('[data-filter]').forEach((button) => button.addEventListener('click', () => {
 			document.querySelectorAll('[data-filter]').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
@@ -192,7 +203,7 @@
 		document.querySelectorAll('[data-category]').forEach((button) => button.addEventListener('click', () => {
 			selectedCategory = button.dataset.category;
 			document.querySelectorAll('[data-category]').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
-			document.querySelector('#task-submit').lastChild.textContent = selectedCategory === 'Geral' ? 'Adicionar tarefa' : `Adicionar tarefa em ${selectedCategory}`;
+			document.querySelector('#task-category-label').textContent = `Categoria: ${selectedCategory}`;
 			renderTasks();
 		}));
 		renderTasks();

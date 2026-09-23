@@ -448,6 +448,34 @@ label.row-title { cursor: pointer; }
 .empty p { max-width: 34ch; color: var(--ink-soft); }
 .empty .btn { margin-top: 0.75rem; }
 
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background: rgba(20, 32, 26, 0.45);
+}
+.modal-card {
+  width: min(100%, 480px);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sheet);
+  box-shadow: 0 24px 60px -24px rgba(16, 32, 25, 0.5);
+}
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.25rem 0;
+}
+.modal-head h2 { font-size: 1.35rem; }
+.modal-card .composer { padding: 1.1rem 1.25rem 1.25rem; border-bottom: 0; }
+.modal-card .composer label { font-weight: 600; font-size: 0.94rem; }
+.modal-card .composer-actions { gap: 0.5rem; }
+.modal-category { color: var(--ink-soft); font-size: 0.9rem; }
+
 
 /* ==========================================================================
    8. Login / cadastro
