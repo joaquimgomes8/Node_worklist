@@ -4,7 +4,7 @@
 	const SESSION_KEY = 'work-lista-session';
 	const USERS_KEY = 'work-lista-users';
 	const TASKS_PREFIX = 'work-lista-tasks:';
-	let selectedCategory = 'Pessoal';
+	let selectedCategory = 'Geral';
 
 	const readJson = (key, fallback) => {
 		try {
@@ -128,7 +128,7 @@
 		if (!list) return;
 		const filter = document.querySelector('[data-filter][aria-pressed="true"]')?.dataset.filter || 'all';
 		const tasks = getTasks();
-		const active = tasks.filter((task) => !task.deleted && (task.category || 'Pessoal') === selectedCategory && (filter === 'all' || (filter === 'done' ? task.done : !task.done)));
+		const active = tasks.filter((task) => !task.deleted && (selectedCategory === 'Geral' || (task.category || 'Pessoal') === selectedCategory) && (filter === 'all' || (filter === 'done' ? task.done : !task.done)));
 		list.replaceChildren(...active.map((task) => renderTaskRow(task)));
 		const status = document.querySelector('#status');
 		if (active.length === 0) {
@@ -136,7 +136,7 @@
 		} else if (status) {
 			status.hidden = true;
 		}
-		const categoryTasks = tasks.filter((task) => !task.deleted && (task.category || 'Pessoal') === selectedCategory);
+		const categoryTasks = tasks.filter((task) => !task.deleted && (selectedCategory === 'Geral' || (task.category || 'Pessoal') === selectedCategory));
 		const done = categoryTasks.filter((task) => task.done).length;
 		const pending = categoryTasks.filter((task) => !task.done).length;
 		document.querySelector('#summary').textContent = `${selectedCategory} · ${pending} pendente${pending === 1 ? '' : 's'} · ${done} concluída${done === 1 ? '' : 's'}`;
@@ -192,7 +192,7 @@
 		document.querySelectorAll('[data-category]').forEach((button) => button.addEventListener('click', () => {
 			selectedCategory = button.dataset.category;
 			document.querySelectorAll('[data-category]').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
-			document.querySelector('#task-submit').lastChild.textContent = `Adicionar tarefa em ${selectedCategory}`;
+			document.querySelector('#task-submit').lastChild.textContent = selectedCategory === 'Geral' ? 'Adicionar tarefa' : `Adicionar tarefa em ${selectedCategory}`;
 			renderTasks();
 		}));
 		renderTasks();

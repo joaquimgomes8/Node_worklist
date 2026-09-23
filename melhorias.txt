@@ -1,3 +1,2 @@
-00. botao geral do lado das categorias trab
 01. botao de exportar as tarefas cadastradas
-02. definir horario e data maxima para tarefas
+02. definir horario e data maxima para tarefas no cadastro se quiser
