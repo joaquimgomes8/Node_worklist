@@ -340,6 +340,24 @@ button, input, textarea { font: inherit; color: inherit; }
 }
 .chip:hover { color: var(--ink); border-color: var(--accent); }
 .chip[aria-pressed="true"] { background: var(--accent-wash); border-color: var(--accent); color: var(--accent); }
+.category-add {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  min-height: 36px;
+  padding: 0;
+  border: 1px dashed var(--line-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--accent);
+  font-size: 1.3rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.category-add:hover { border-color: var(--accent); background: var(--accent-wash); }
+.custom-category { display: inline-flex; align-items: center; gap: 0.2rem; }
+.category-delete { width: 20px; height: 20px; padding: 0; border: 0; background: transparent; color: var(--ink-faint); cursor: pointer; }
+.category-delete:hover { color: var(--danger); }
 
 
 /* ==========================================================================
@@ -474,6 +492,7 @@ label.row-title { cursor: pointer; }
   padding: 1.25rem 1.25rem 0;
 }
 .modal-head h2 { font-size: 1.35rem; }
+.modal-small { width: min(100%, 380px); }
 .modal-card .composer { padding: 1.1rem 1.25rem 1.25rem; border-bottom: 0; }
 .modal-card .composer label { font-weight: 600; font-size: 0.94rem; }
 .modal-card .composer-actions { gap: 0.5rem; }

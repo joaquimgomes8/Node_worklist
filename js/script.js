@@ -4,6 +4,8 @@
 	const SESSION_KEY = 'work-lista-session';
 	const USERS_KEY = 'work-lista-users';
 	const TASKS_PREFIX = 'work-lista-tasks:';
+	const CATEGORIES_PREFIX = 'work-lista-categories:';
+	const DEFAULT_CATEGORIES = ['Geral', 'Pessoal', 'Trabalho', 'Estudos'];
 	let selectedCategory = 'Geral';
 	let openTaskEditor = () => {};
 
@@ -18,6 +20,13 @@
 	const writeJson = (key, value) => localStorage.setItem(key, JSON.stringify(value));
 	const currentUser = () => localStorage.getItem(SESSION_KEY);
 	const tasksKey = () => `${TASKS_PREFIX}${currentUser()}`;
+	const categoriesKey = () => `${CATEGORIES_PREFIX}${currentUser()}`;
+	const getCategories = () => {
+		const stored = readJson(categoriesKey(), DEFAULT_CATEGORIES);
+		const custom = Array.isArray(stored) ? stored : [];
+		return [...new Set([...DEFAULT_CATEGORIES, ...custom.filter((category) => typeof category === 'string' && category.trim())])];
+	};
+	const saveCategories = (categories) => writeJson(categoriesKey(), categories);
 	const redirectToLogin = () => { window.location.href = 'login.html'; };
 
 	function initAuth() {
@@ -227,6 +236,97 @@
 	function initTasks() {
 		const form = document.querySelector('#task-form');
 		if (!form) return;
+		const categoryToolbar = document.querySelector('#category-toolbar');
+		const categoryModal = document.querySelector('#category-modal');
+		const categoryForm = document.querySelector('#category-form');
+		const categoryError = document.querySelector('#category-error');
+		const renderCategoryControls = () => {
+			categoryToolbar.querySelectorAll('.custom-category').forEach((button) => button.remove());
+			const addButton = document.querySelector('#add-category');
+			getCategories().slice(DEFAULT_CATEGORIES.length).forEach((category) => {
+				const button = document.createElement('div');
+				button.className = 'chip custom-category';
+				button.setAttribute('role', 'button');
+				button.tabIndex = 0;
+				button.dataset.category = category;
+				button.setAttribute('aria-pressed', String(category === selectedCategory));
+				const label = document.createElement('span');
+				label.textContent = category;
+				const remove = document.createElement('button');
+				remove.className = 'category-delete';
+				remove.type = 'button';
+				remove.dataset.deleteCategory = category;
+				remove.setAttribute('aria-label', `Excluir categoria ${category}`);
+				remove.title = `Excluir categoria ${category}`;
+				remove.textContent = '×';
+				button.append(label, remove);
+				categoryToolbar.insertBefore(button, addButton);
+			});
+			const categorySelect = form.elements.category;
+			const currentValue = categorySelect.value;
+			categorySelect.replaceChildren(...getCategories().map((category) => {
+				const option = document.createElement('option');
+				option.value = category;
+				option.textContent = category;
+				return option;
+			}));
+			categorySelect.value = getCategories().includes(currentValue) ? currentValue : selectedCategory;
+			categoryToolbar.querySelectorAll('[data-category]').forEach((item) => item.setAttribute('aria-pressed', String(item.dataset.category === selectedCategory)));
+		};
+		renderCategoryControls();
+		const closeCategoryModal = () => { categoryModal.hidden = true; categoryForm.reset(); categoryError.hidden = true; };
+		document.querySelector('#add-category').addEventListener('click', () => {
+			categoryModal.hidden = false;
+			document.querySelector('#category-name').focus();
+		});
+		document.querySelector('#close-category-modal').addEventListener('click', closeCategoryModal);
+		document.querySelector('#cancel-category').addEventListener('click', closeCategoryModal);
+		categoryModal.addEventListener('click', (event) => { if (event.target === categoryModal) closeCategoryModal(); });
+		categoryForm.addEventListener('submit', (event) => {
+			event.preventDefault();
+			const name = categoryForm.elements.name.value.trim();
+			const categories = getCategories();
+			if (!name) return;
+			if (categories.some((category) => category.toLowerCase() === name.toLowerCase())) {
+				categoryError.textContent = 'Essa categoria já existe.';
+				categoryError.hidden = false;
+				return;
+			}
+			categories.push(name);
+			saveCategories(categories);
+			selectedCategory = name;
+			renderCategoryControls();
+			categoryModal.hidden = true;
+			categoryForm.reset();
+			renderTasks();
+		});
+		categoryToolbar.addEventListener('click', (event) => {
+			const deleteButton = event.target.closest('[data-delete-category]');
+			if (deleteButton) {
+				event.stopPropagation();
+				const category = deleteButton.dataset.deleteCategory;
+				if (!window.confirm(`Excluir a categoria "${category}"? As tarefas serão movidas para Geral.`)) return;
+				saveTasks(getTasks().map((task) => task.category === category ? { ...task, category: 'Geral' } : task));
+				saveCategories(getCategories().filter((item) => item !== category));
+				if (selectedCategory === category) selectedCategory = 'Geral';
+				renderCategoryControls();
+				renderTasks();
+				return;
+			}
+			const button = event.target.closest('[data-category]');
+			if (!button) return;
+			selectedCategory = button.dataset.category;
+			categoryToolbar.querySelectorAll('[data-category]').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+			if (!editingTaskId && !modal.hidden) form.elements.category.value = selectedCategory;
+			renderTasks();
+		});
+		categoryToolbar.addEventListener('keydown', (event) => {
+			if (event.key !== 'Enter' && event.key !== ' ') return;
+			const button = event.target.closest('[data-category]');
+			if (!button || event.target.closest('[data-delete-category]')) return;
+			event.preventDefault();
+			button.click();
+		});
 		const modal = document.querySelector('#task-modal');
 		let draftSubtasks = [];
 		let draftImage = '';
@@ -338,12 +438,6 @@
 		});
 		document.querySelectorAll('[data-filter]').forEach((button) => button.addEventListener('click', () => {
 			document.querySelectorAll('[data-filter]').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
-			renderTasks();
-		}));
-		document.querySelectorAll('[data-category]').forEach((button) => button.addEventListener('click', () => {
-			selectedCategory = button.dataset.category;
-			document.querySelectorAll('[data-category]').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
-			if (!editingTaskId && !modal.hidden) form.elements.category.value = selectedCategory;
 			renderTasks();
 		}));
 		renderTasks();
