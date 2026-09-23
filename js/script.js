@@ -5,6 +5,7 @@
 	const USERS_KEY = 'work-lista-users';
 	const TASKS_PREFIX = 'work-lista-tasks:';
 	let selectedCategory = 'Geral';
+	let openTaskEditor = () => {};
 
 	const readJson = (key, fallback) => {
 		try {
@@ -86,7 +87,7 @@
 		if (trash) {
 			row.innerHTML = '<div class="row-body"><span class="row-title"></span><span class="row-meta"></span></div><div class="row-actions"><button class="btn btn-quiet btn-sm" data-action="restore" type="button">Restaurar</button><button class="btn btn-danger-quiet btn-sm" data-action="delete" type="button">Excluir</button></div>';
 		} else {
-			row.innerHTML = '<input class="check" type="checkbox" aria-label="Concluir tarefa"><div class="row-body"><label class="row-title"></label><span class="row-desc"></span><span class="row-meta"></span></div><div class="row-actions"><button class="btn btn-danger-quiet btn-sm" data-action="trash" type="button">Excluir</button></div>';
+			row.innerHTML = '<input class="check" type="checkbox" aria-label="Concluir tarefa"><div class="row-body"><label class="row-title"></label><span class="row-desc"></span><span class="row-meta"></span></div><div class="row-actions"><button class="icon-btn task-edit" data-action="edit" type="button" aria-label="Editar tarefa" title="Editar tarefa">⚙</button><button class="btn btn-danger-quiet btn-sm" data-action="trash" type="button">Excluir</button></div>';
 			row.querySelector('.check').checked = task.done;
 			row.querySelector('.check').addEventListener('change', (event) => {
 				const tasks = getTasks();
@@ -151,6 +152,7 @@
 			row.querySelector('.row-body').append(subtasks);
 		}
 		row.querySelector('[data-action="trash"]')?.addEventListener('click', () => moveToTrash(task.id));
+		row.querySelector('[data-action="edit"]')?.addEventListener('click', () => openTaskEditor(task));
 		row.querySelector('[data-action="restore"]')?.addEventListener('click', () => restoreTask(task.id));
 		row.querySelector('[data-action="delete"]')?.addEventListener('click', () => deleteTask(task.id));
 		return row;
@@ -228,6 +230,7 @@
 		const modal = document.querySelector('#task-modal');
 		let draftSubtasks = [];
 		let draftImage = '';
+		let editingTaskId = null;
 		const renderDraftSubtasks = () => {
 			const list = document.querySelector('#subtask-editor-list');
 			list.replaceChildren(...draftSubtasks.map((subtask, index) => {
@@ -266,12 +269,34 @@
 			document.querySelector('#task-image').value = '';
 			renderDraftSubtasks();
 		};
-		const openModal = () => {
+		const openModal = (task = null) => {
+			editingTaskId = task?.id || null;
+			form.reset();
+			if (task) {
+				form.elements.title.value = task.title;
+				form.elements.description.value = task.description || '';
+				form.elements.category.value = task.category || 'Pessoal';
+				form.elements.dueDate.value = task.dueDate || '';
+				form.elements.priority.value = task.priority || 'media';
+				form.elements.link.value = task.link || '';
+				draftSubtasks = (task.subtasks || []).map((subtask) => ({ ...subtask }));
+				draftImage = task.image || '';
+				document.querySelector('#task-modal-title').textContent = 'Editar tarefa';
+				document.querySelector('#task-submit').textContent = 'Salvar alterações';
+			} else {
+				draftSubtasks = [];
+				draftImage = '';
+				document.querySelector('#task-modal-title').textContent = 'Adicionar tarefa';
+				document.querySelector('#task-submit').textContent = 'Cadastrar tarefa';
+				form.elements.category.value = selectedCategory;
+			}
+			renderDraftSubtasks();
+			showImage(draftImage);
 			modal.hidden = false;
-			document.querySelector('#task-category-label').textContent = `Categoria: ${selectedCategory}`;
 			form.elements.title.focus();
 		};
-		const closeModal = () => { modal.hidden = true; form.reset(); resetDraft(); };
+		openTaskEditor = (task) => openModal(task);
+		const closeModal = () => { modal.hidden = true; form.reset(); resetDraft(); editingTaskId = null; };
 		document.querySelector('#open-task-modal').addEventListener('click', openModal);
 		document.querySelector('#close-task-modal').addEventListener('click', closeModal);
 		document.querySelector('#cancel-task-modal').addEventListener('click', closeModal);
@@ -300,7 +325,13 @@
 			const title = form.elements.title.value.trim();
 			if (!title) return form.elements.title.focus();
 			const tasks = getTasks();
-			tasks.unshift({ id: crypto.randomUUID(), category: selectedCategory, title, description: form.elements.description.value.trim(), dueDate: form.elements.dueDate.value, priority: form.elements.priority.value, link: form.elements.link.value.trim(), subtasks: draftSubtasks, image: draftImage, done: false, deleted: false });
+			const taskData = { category: form.elements.category.value, title, description: form.elements.description.value.trim(), dueDate: form.elements.dueDate.value, priority: form.elements.priority.value, link: form.elements.link.value.trim(), subtasks: draftSubtasks.map((subtask) => ({ ...subtask })), image: draftImage };
+			if (editingTaskId) {
+				const task = tasks.find((entry) => entry.id === editingTaskId);
+				if (task) Object.assign(task, taskData);
+			} else {
+				tasks.unshift({ id: crypto.randomUUID(), ...taskData, done: false, deleted: false });
+			}
 			saveTasks(tasks);
 			closeModal();
 			renderTasks();
@@ -312,7 +343,7 @@
 		document.querySelectorAll('[data-category]').forEach((button) => button.addEventListener('click', () => {
 			selectedCategory = button.dataset.category;
 			document.querySelectorAll('[data-category]').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
-			document.querySelector('#task-category-label').textContent = `Categoria: ${selectedCategory}`;
+			if (!editingTaskId && !modal.hidden) form.elements.category.value = selectedCategory;
 			renderTasks();
 		}));
 		renderTasks();

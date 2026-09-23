@@ -430,6 +430,9 @@ label.row-title { cursor: pointer; }
 }
 .icon-btn:hover,
 .icon-btn:focus-visible { background: var(--danger-wash); color: var(--danger); }
+.task-edit { margin: -0.4rem 0 0 -0.5rem; color: var(--ink-faint); font-size: 1.15rem; }
+.task-edit:hover,
+.task-edit:focus-visible { background: var(--accent-wash); color: var(--accent); }
 
 /* Lixeira: sem caixa de seleção; título e ações */
 .row-trash { grid-template-columns: 1fr auto; align-items: center; }
