@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/joaquimgomes8/Springboot_worklist#readme",
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
     "express": "^5.2.1"
   }
 }
